@@ -1,0 +1,35 @@
+{
+  "name": "hyperselect",
+  "version": "0.1.0",
+  "description": "Text selection effects, rendered with WebGL.",
+  "keywords": ["text-selection", "selection", "highlight", "webgl", "webgl2", "glsl", "shaders", "effects", "animation"],
+  "homepage": "https://github.com/alixsep/hyperselect#readme",
+  "bugs": "https://github.com/alixsep/hyperselect/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alixsep/hyperselect.git",
+    "directory": "packages/hyperselect"
+  },
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "CHANGELOG.md"],
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run",
+    "typecheck": "tsc -p ."
+  },
+  "devDependencies": {
+    "happy-dom": "^20.14.5",
+    "tsdown": "^0.23.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  }
+}

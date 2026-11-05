@@ -1,0 +1,140 @@
+@import './base.css';
+
+:root,
+.dark {
+  --page: #0b0c10;
+  --ink: #f2efe8;
+  --dim: #8f8c84;
+  --rule: rgb(255 255 255 / 0.14);
+}
+
+:root[data-theme='light'],
+.light {
+  --page: #eef0f2;
+  --ink: #16150f;
+  --dim: #5e5c56;
+  --rule: rgb(20 20 30 / 0.16);
+}
+
+html,
+body {
+  background: var(--page);
+  color: var(--ink);
+}
+
+#stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+}
+
+.word {
+  font-size: 48px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variation-settings: 'opsz' 144;
+}
+
+.word.italic {
+  font-style: italic;
+}
+
+.wall {
+  display: grid;
+  grid-template-columns: repeat(8, 112px);
+  row-gap: 30px;
+  justify-items: center;
+  font-size: 19px;
+}
+
+#pointer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 17px;
+  margin: -1.3px 0 0 -1.8px;
+  pointer-events: none;
+  filter: drop-shadow(0 1.3px 2.6px rgb(0 0 0 / 0.35));
+}
+
+#pointer[hidden] {
+  display: none;
+}
+
+#pointer svg {
+  display: block;
+  width: 100%;
+}
+
+#pointer path {
+  fill: #fff;
+  stroke: #000;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.card {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+
+.card .title {
+  font-size: 50px;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  font-variation-settings: 'opsz' 144;
+}
+
+.card .summary {
+  margin-top: 14px;
+  font-size: 12px;
+}
+
+.card .detail {
+  margin-top: 4px;
+  font-size: 8.5px;
+  font-style: italic;
+  color: var(--dim);
+}
+
+.card .facts {
+  margin-top: 10px;
+  font-family: 'Inter Variable', sans-serif;
+  font-size: 6px;
+  letter-spacing: 0.03em;
+  color: var(--dim);
+}
+
+.card .install {
+  margin-top: 12px;
+  padding: 3.5px 8px;
+  border: 0.4px solid var(--rule);
+  border-radius: 999px;
+  font-family: 'Inter Variable', sans-serif;
+  font-size: 7px;
+}
+
+.card .install .untyped {
+  color: transparent;
+}
+
+.card .install .caret {
+  display: inline-block;
+  width: 0.5px;
+  height: 1.15em;
+  margin: 0 0.3px -0.22em;
+  background: currentColor;
+}
+
+.card .install .caret.off {
+  visibility: hidden;
+}
+
+.card .install.ready {
+  border-color: color-mix(in srgb, var(--ink) 55%, transparent);
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+}

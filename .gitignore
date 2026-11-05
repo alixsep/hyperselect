@@ -1,0 +1,10 @@
+node_modules
+dist
+prototype
+*.tsbuildinfo
+test-results
+playwright-report
+.tmp
+.claude/settings.local.json
+.DS_Store
+*.log

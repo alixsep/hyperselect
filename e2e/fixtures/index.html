@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Alignment fixture</title>
+    <link rel="icon" href="data:," />
+    <style>
+      body {
+        position: relative;
+        top: 13px;
+        margin: 24px 31px;
+        font: 17px/1.7 sans-serif;
+        color: transparent;
+        background: #fff;
+      }
+      p {
+        max-width: 34em;
+        margin: 0 0 40px;
+      }
+      a {
+        color: inherit;
+      }
+      .big {
+        font-size: 28px;
+        line-height: 1.2;
+      }
+      #scroller {
+        height: 120px;
+        margin-bottom: 40px;
+        overflow: auto;
+      }
+      #scaled {
+        margin-bottom: 120px;
+        transform: scale(1.25);
+        transform-origin: 0 0;
+      }
+      #plain:hover {
+        padding-left: 90px;
+      }
+      #tilted {
+        rotate: 6deg;
+      }
+      #vertical {
+        height: 140px;
+        writing-mode: vertical-rl;
+      }
+      #deep {
+        margin-top: 2400px;
+      }
+      #sticky {
+        position: sticky;
+        top: 0;
+        background: #eee;
+      }
+      #card {
+        margin-bottom: 120px;
+        background: #eee;
+        transform: translate(30px, 10px) scale(1.2);
+        transform-origin: 0 0;
+      }
+      #feed {
+        position: relative;
+        height: 120px;
+        margin-bottom: 400px;
+        overflow: auto;
+      }
+      #feed p {
+        margin: 0 0 12px;
+        background: #eee;
+      }
+    </style>
+    <script type="module" src="./main.ts"></script>
+  </head>
+  <body>
+    <header id="sticky" hidden>A sticky header keeps its highlight while the page scrolls underneath it.</header>
+    <p id="plain">
+      Every day, hundreds of millions of people highlight text. They do it to copy a quote, to keep their place, to think. And every time,
+      the browser answers with the same flat rectangle it has drawn since 1995.
+    </p>
+    <p id="mixed">
+      Selections cross <em>emphasis</em>, <b>strong type</b>, <span class="big">larger words</span>, <code>inline code</code> and
+      <a href="#mixed">links</a> without losing their shape.
+    </p>
+    <p id="rtl" dir="rtl" lang="ar">كل يوم يحدد ملايين الناس النصوص لنسخ اقتباس أو للاحتفاظ بمكانهم أو للتفكير في ما يقرؤونه.</p>
+    <div id="scroller">
+      <p>
+        This paragraph lives in its own scrolling box. Only the part of it that the box shows should ever be highlighted, however far the
+        box has been scrolled and however much of the text is selected. The rest of it stays hidden, exactly as the text does, and the
+        effect never spills over the content around the box.
+      </p>
+    </div>
+    <div id="scaled">
+      <p>Scaled content keeps the effect glued to every glyph, because the geometry comes straight from the browser.</p>
+    </div>
+    <p id="tilted">Rotated text keeps the native highlight, since a flat effect could never follow its slant.</p>
+    <p id="vertical" lang="ja">縦書きの文章は通常の選択のままです。</p>
+    <p id="deep">
+      Far down the page, the effect still lines up with the words, whether the page was scrolled before or after the selection was made.
+    </p>
+    <div id="card"><p>A painted card that is moved and scaled still carries the effect on every glyph.</p></div>
+    <div id="feed">
+      <p>Painted messages inside a positioned scrolling box are highlighted where they sit.</p>
+      <p>Scrolling the box carries the effect along with the words, without waiting for a redraw.</p>
+      <p>Whatever the box hides stays hidden, highlight included.</p>
+    </div>
+    <dialog id="modal"><p>A modal dialog sits in the top layer, above everything else on the page.</p></dialog>
+  </body>
+</html>

@@ -1,0 +1,31 @@
+@import './shared.css';
+
+#stage {
+  gap: 22px;
+}
+
+.paragraph {
+  width: 380px;
+  font-size: 19px;
+  line-height: 1.5;
+}
+
+.sentence {
+  font-size: 28px;
+  letter-spacing: -0.01em;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px 30px;
+  width: 300px;
+  font-size: 22px;
+}
+
+.code {
+  font-family: ui-monospace, 'DejaVu Sans Mono', monospace;
+  font-size: 12px;
+  color: var(--dim);
+}

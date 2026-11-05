@@ -1,0 +1,41 @@
+{
+  "name": "@hyperselect/presets",
+  "version": "0.1.0",
+  "description": "220 text selection effects for hyperselect, in eleven categories.",
+  "keywords": ["hyperselect", "text-selection", "selection", "highlight", "webgl", "glsl", "shaders", "presets"],
+  "homepage": "https://github.com/alixsep/hyperselect#readme",
+  "bugs": "https://github.com/alixsep/hyperselect/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alixsep/hyperselect.git",
+    "directory": "packages/presets"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "CHANGELOG.md"],
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run",
+    "typecheck": "tsc -p ."
+  },
+  "peerDependencies": {
+    "hyperselect": "workspace:^"
+  },
+  "devDependencies": {
+    "hyperselect": "workspace:*",
+    "tsdown": "^0.23.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  }
+}
