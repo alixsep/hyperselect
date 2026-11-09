@@ -5,7 +5,7 @@ export const NOISE_CELLS = 256
 const header = /* glsl */ `#version 300 es
 precision highp float;
 precision highp int;
-uniform float uTime, uFade, uLight;
+uniform float uTime, uFade, uLight, uSwap;
 uniform vec3 uTint;
 uniform highp sampler2D uNoise;
 out vec4 fragColor;
@@ -90,7 +90,8 @@ vec4 onPage(vec4 color) {
 
 void present(vec4 color) {
   if (color.a < 0.002 && dot(color.rgb, vec3(1.0)) < 0.004) discard;
-  fragColor = onPage(color);
+  vec4 painted = onPage(color);
+  fragColor = uSwap > 0.5 ? painted.bgra : painted;
 }
 `
 

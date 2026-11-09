@@ -27,7 +27,7 @@ export function toPadding(value: number | Partial<Padding> = 0): Padding {
   return { top: 0, right: 0, bottom: 0, left: 0, ...sides }
 }
 
-export function readSelection(root: Node, padding: Padding, originOf: (host: HTMLElement) => Origin): Selected {
+export function readSelection(root: Node, padding: Padding, originOf: (host: HTMLElement, range: Range) => Origin): Selected {
   const rects: Rect[] = []
   const elements = new Map<HTMLElement, Look>()
   const hosts = new Map<HTMLElement, Theme | null>()
@@ -53,15 +53,17 @@ export function readSelection(root: Node, padding: Padding, originOf: (host: HTM
       }
       elements.set(parent, backdrop.element === page.element ? null : (themeOf(getComputedStyle(parent).color, 'text') ?? backdrop.theme))
       hosts.set(backdrop.element, backdrop.theme)
-      let origin = origins.get(backdrop.element)
-      if (!origin) origins.set(backdrop.element, (origin = originOf(backdrop.element)))
       const clip = intersect(band, clipOf(parent, clipped))
       let lineHeight = lineHeights.get(parent)
       if (lineHeight === undefined) lineHeights.set(parent, (lineHeight = lineHeightOf(parent)))
       probe.selectNodeContents(node)
       if (node === range.startContainer) probe.setStart(node, paintedStart(node, range.startOffset))
       if (node === range.endContainer) probe.setEnd(node, range.endOffset)
-      for (const box of lineBoxes(probe, lineHeight, clip)) rects.push(toRect(box, origin, backdrop.element))
+      for (const box of lineBoxes(probe, lineHeight, clip)) {
+        let origin = origins.get(backdrop.element)
+        if (!origin) origins.set(backdrop.element, (origin = originOf(backdrop.element, range)))
+        rects.push(toRect(box, origin, backdrop.element))
+      }
     }
   }
   return { rects: padLines(mergeLines(rects), padding), elements, hosts }
@@ -237,7 +239,8 @@ function clipOf(element: Element | null, cache: Map<Element, Box>): Box {
   if (clip) return clip
   const parent = element.parentElement
   clip = clipOf(parent, cache)
-  if (clips(getComputedStyle(element))) clip = intersect(clip, paddingBox(element))
+  const style = getComputedStyle(element)
+  if (clips(style)) clip = intersect(clip, paddingBox(element, style))
   if (parent instanceof HTMLDetailsElement && element !== parent.querySelector(':scope > summary') && clips(getComputedStyle(parent, '::details-content'))) {
     clip = intersect(clip, detailsContentBox(parent))
   }
@@ -246,7 +249,7 @@ function clipOf(element: Element | null, cache: Map<Element, Box>): Box {
 }
 
 function detailsContentBox(details: HTMLDetailsElement): Box {
-  const box = paddingBox(details)
+  const box = paddingBox(details, getComputedStyle(details))
   const summary = details.querySelector(':scope > summary')
   return summary ? { ...box, top: Math.max(box.top, summary.getBoundingClientRect().bottom) } : box
 }
@@ -254,7 +257,7 @@ function detailsContentBox(details: HTMLDetailsElement): Box {
 function* selectedText(range: Range, root: Node): Generator<Text> {
   const ancestor = range.commonAncestorContainer
   if (ancestor instanceof Text) {
-    if (root.contains(ancestor) && ancestor.data.trim() && ancestor.parentElement) yield ancestor
+    if (root.contains(ancestor) && ancestor.parentElement && selectedPart(range, ancestor).trim()) yield ancestor
     return
   }
   const scope = root.contains(ancestor) ? ancestor : ancestor.contains(root) ? root : null
@@ -262,8 +265,14 @@ function* selectedText(range: Range, root: Node): Generator<Text> {
   const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT)
   for (let node = walker.nextNode(); node; node = walker.nextNode()) {
     const text = node as Text
-    if (text.parentElement && text.data.trim() && range.intersectsNode(text)) yield text
+    if (text.parentElement && range.intersectsNode(text) && selectedPart(range, text).trim()) yield text
   }
+}
+
+function selectedPart(range: Range, text: Text): string {
+  const start = text === range.startContainer ? range.startOffset : 0
+  const end = text === range.endContainer ? range.endOffset : text.length
+  return text.data.slice(start, end)
 }
 
 const luminances = new Map<string, number | null>()

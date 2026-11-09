@@ -39,11 +39,16 @@ export interface Box {
 
 export const clips = ({ overflowX, overflowY }: CSSStyleDeclaration): boolean => overflowX !== 'visible' || overflowY !== 'visible'
 
-export function paddingBox(element: Element): Box {
+export function paddingBox(element: Element, { borderRightWidth, borderBottomWidth }: CSSStyleDeclaration): Box {
   const r = element.getBoundingClientRect()
   const left = r.left + element.clientLeft
   const top = r.top + element.clientTop
-  return { left, top, right: left + element.clientWidth, bottom: top + element.clientHeight }
+  return {
+    left,
+    top,
+    right: Math.min(left + element.clientWidth, r.right - parseFloat(borderRightWidth)),
+    bottom: Math.min(top + element.clientHeight, r.bottom - parseFloat(borderBottomWidth)),
+  }
 }
 
 export function intersect(a: Box, b: Box): Box {
@@ -53,7 +58,8 @@ export function intersect(a: Box, b: Box): Box {
 export function visiblePart(host: HTMLElement, { x, y, width, height }: Region): Region {
   let box: Box = { left: x, top: y, right: x + width, bottom: y + height }
   for (let element: Element | null = host; element && element !== document.body && element !== document.documentElement; element = element.parentElement) {
-    if (clips(getComputedStyle(element))) box = intersect(box, paddingBox(element))
+    const style = getComputedStyle(element)
+    if (clips(style)) box = intersect(box, paddingBox(element, style))
   }
   return { x: box.left, y: box.top, width: box.right - box.left, height: box.bottom - box.top }
 }

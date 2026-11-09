@@ -257,7 +257,7 @@ class Studio {
     const frame = this.frame
     frame.dpr = Math.min(devicePixelRatio || 1, MAX_DPR)
     const { slots, width, height } = arrange(marks.map((mark) => ({ width: Math.ceil(mark.width * frame.dpr), height: Math.ceil(mark.height * frame.dpr) })))
-    this.renderer.begin(width, height)
+    this.renderer.begin(width, height, true)
     marks.forEach((mark, i) => {
       frame.time = mark.sim.time
       frame.light = mark.theme === 'light' ? 1 : 0

@@ -11,7 +11,7 @@ const SKIPPED = ['License']
 
 const marked = new Marked({
   renderer: {
-    code: ({ text }) => `<pre><code>${tokens(text)}</code></pre>\n`,
+    code: ({ text, lang }) => `<pre data-lang="${lang ?? ''}"><code>${tokens(text)}</code></pre>\n`,
   },
 })
 

@@ -219,6 +219,35 @@ test('never grows the scrolling box it draws in', async ({ page }) => {
   expect(await size()).toEqual(before)
 })
 
+test('ignores a text node the selection only touches at its edge', async ({ page }) => {
+  await page.evaluate(() => document.querySelector('#feed')!.scrollIntoView({ block: 'center' }))
+  const churn = await page.evaluate(async () => {
+    const [first, second] = document.querySelectorAll('#feed p')
+    getSelection()!.setBaseAndExtent(first!.firstChild!, 10, second!.firstChild!, 0)
+    await new Promise((resolve) => setTimeout(resolve, 700))
+    let changes = 0
+    const observer = new MutationObserver((records) => (changes += records.length))
+    observer.observe(second!, { childList: true })
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    observer.disconnect()
+    return changes
+  })
+  expect(churn).toBe(0)
+  expect(await page.getAttribute('#feed p:nth-child(2)', 'data-hyperselect-selected')).toBeNull()
+})
+
+test('keeps its layers out of the selected range', async ({ page }) => {
+  await page.evaluate(() => document.querySelector('#feed')!.scrollIntoView({ block: 'center' }))
+  const inRange = await page.evaluate(async () => {
+    const [first, second] = document.querySelectorAll('#feed p')
+    getSelection()!.setBaseAndExtent(first!.firstChild!, 10, second!.firstChild!, 5)
+    await new Promise((resolve) => setTimeout(resolve, 700))
+    const range = getSelection()!.getRangeAt(0)
+    return [...document.querySelectorAll('#feed p > [aria-hidden]')].filter((layer) => range.intersectsNode(layer)).length
+  })
+  expect(inRange).toBe(0)
+})
+
 test('skips text folded away in a closed details', async ({ page }) => {
   await page.evaluate(() => document.querySelector('#folded')!.scrollIntoView({ block: 'center' }))
   await select(page, '#folded')

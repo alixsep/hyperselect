@@ -247,10 +247,10 @@ export class Engine implements HyperSelect {
     this.sharpness = Math.min((devicePixelRatio || 1) * visible.scale, MAX_DPR)
   }
 
-  private readonly originOf = (host: HTMLElement): Origin => {
+  private readonly originOf = (host: HTMLElement, range?: Range): Origin => {
     let layer = this.layers.get(host)
     if (!layer) this.layers.set(host, (layer = new Layer(host, this.zIndex)))
-    layer.attach()
+    layer.attach(range)
     return layer.origin()
   }
 
@@ -388,7 +388,7 @@ export class Engine implements HyperSelect {
     const { slots, width, height } = arrange(jobs)
     const [primary, ...copies] = jobs.map((job, i) => ({ ...job, slot: slots[i]! }))
     if (!primary) return
-    this.renderer.begin(width, height)
+    this.renderer.begin(width, height, copies.length > 0)
     if (copies.length) {
       for (const { frame, slot } of copies) this.renderer.draw(this.preset, frame, slot)
       const staged = this.stage.capture(this.canvas)

@@ -34,8 +34,12 @@ export class Layer {
     return node === this.element || node === this.own
   }
 
-  attach(): void {
+  // Inside the selected range the layer would stretch the selection bounds that mobile browsers place their menu by.
+  attach(range?: Range): void {
     if (this.element.parentNode !== this.host) this.host.append(this.element)
+    if (!range?.intersectsNode(this.element)) return
+    if (range.comparePoint(this.host, 0) < 0) this.host.prepend(this.element)
+    else if (range.comparePoint(this.host, this.host.childNodes.length) > 0) this.host.append(this.element)
   }
 
   origin(): Origin {

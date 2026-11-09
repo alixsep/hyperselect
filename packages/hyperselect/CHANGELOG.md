@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2
+
+- Effects inside painted containers and on `highlight()` elements no longer swap red and blue in Firefox versions whose accelerated 2D canvas swaps them when copying from WebGL.
+- The effect no longer adds a pixel of scroll to a scrolling box whose height is not a whole number of pixels.
+- On Android, the copy and share menu no longer jumps or flickers while text in or next to a painted element is selected.
+
 ## 0.1.1
 
 - Text inside a closed `<details>`, or anything else the browser hides from view, is no longer highlighted when it is part of the selection.

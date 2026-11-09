@@ -2,12 +2,13 @@ import { LINE_FLOATS, MAX_LINES } from './lines'
 import { SPRITE_FLOATS } from './pool'
 import { NOISE_CELLS, spriteShaders, surfaceShaders } from './shaders'
 import type { Region } from './region'
+import { swapsChannels } from './stage'
 import type { Preset } from './types'
 
 const QUAD = new Float32Array([-0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5])
 const COMPLETION_STATUS_KHR = 0x91b1
 const SIZE_STEP = 256
-const UNIFORMS = ['uTime', 'uFade', 'uLight', 'uTint', 'uPad', 'uView'] as const
+const UNIFORMS = ['uTime', 'uFade', 'uLight', 'uSwap', 'uTint', 'uPad', 'uView'] as const
 
 type Uniforms = Record<(typeof UNIFORMS)[number], WebGLUniformLocation | null>
 
@@ -48,6 +49,8 @@ export class Renderer {
   private spriteVao: WebGLVertexArrayObject | null = null
   private lineBuffer: WebGLBuffer | null = null
   private spriteBuffer: WebGLBuffer | null = null
+  private readonly stagingSwaps: boolean
+  private swap = false
 
   static create(canvas: HTMLCanvasElement, spriteCapacity: number): Renderer | null {
     const gl = canvas.getContext('webgl2', { premultipliedAlpha: true, antialias: false, depth: false, stencil: false })
@@ -58,6 +61,7 @@ export class Renderer {
     this.gl = gl
     this.spriteCapacity = spriteCapacity
     this.setup()
+    this.stagingSwaps = this.probeStaging()
   }
 
   get lost(): boolean {
@@ -90,8 +94,9 @@ export class Renderer {
     return !surface.broken && !sprite?.broken
   }
 
-  begin(width: number, height: number): void {
+  begin(width: number, height: number, staged = false): void {
     const gl = this.gl
+    this.swap = staged && this.stagingSwaps
     width = Math.ceil(width / SIZE_STEP) * SIZE_STEP
     height = Math.ceil(height / SIZE_STEP) * SIZE_STEP
     if (gl.canvas.width !== width) gl.canvas.width = width
@@ -220,6 +225,15 @@ export class Renderer {
     return true
   }
 
+  private probeStaging(): boolean {
+    const gl = this.gl
+    this.begin(1, 1)
+    gl.clearColor(1, 0, 0, 1)
+    gl.clear(gl.COLOR_BUFFER_BIT)
+    gl.clearColor(0, 0, 0, 0)
+    return swapsChannels(gl.canvas as HTMLCanvasElement)
+  }
+
   private use(p: Program, preset: Preset, frame: Frame, slot: Region): void {
     const gl = this.gl
     const u = p.uniforms!
@@ -227,6 +241,7 @@ export class Renderer {
     gl.uniform1f(u.uTime, frame.time)
     gl.uniform1f(u.uFade, frame.fade)
     gl.uniform1f(u.uLight, frame.light)
+    gl.uniform1f(u.uSwap, this.swap ? 1 : 0)
     gl.uniform3f(u.uTint, ...preset.tint)
     gl.uniform3f(u.uPad, ...preset.pad)
     gl.uniform4f(u.uView, frame.x, frame.y, slot.width / frame.dpr, slot.height / frame.dpr)

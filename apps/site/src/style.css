@@ -219,6 +219,10 @@
       span {
         @apply transition-colors duration-500;
       }
+
+      &[data-lang='sh'] {
+        @apply whitespace-pre-wrap;
+      }
     }
 
     .sh__token--keyword {
