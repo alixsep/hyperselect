@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+- Text inside a closed `<details>`, or anything else the browser hides from view, is no longer highlighted when it is part of the selection.
+- The effect no longer grows the scrollable area of a scrolling box it draws in, such as a code block.
+- The effect stays inside a `<details>` while it opens or closes.
+
 ## 0.1.0
 
 First release.

@@ -1,6 +1,6 @@
 {
   "name": "hyperselect",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Text selection effects, rendered with WebGL.",
   "keywords": ["text-selection", "selection", "highlight", "webgl", "webgl2", "glsl", "shaders", "effects", "animation"],
   "homepage": "https://github.com/alixsep/hyperselect#readme",

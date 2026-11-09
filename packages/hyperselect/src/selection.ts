@@ -1,16 +1,9 @@
 import type { Rect } from './lines'
-import type { Origin } from './region'
+import { type Box, clips, intersect, type Origin, paddingBox } from './region'
 import type { Theme } from './types'
 
 const MERGE_GAP = 40
 const IGNORED = '[data-hyperselect-ignore]'
-
-interface Box {
-  left: number
-  top: number
-  right: number
-  bottom: number
-}
 
 const EVERYWHERE: Box = { left: -Infinity, top: -Infinity, right: Infinity, bottom: Infinity }
 
@@ -41,7 +34,7 @@ export function readSelection(root: Node, padding: Padding, originOf: (host: HTM
   const selection = document.getSelection()
   if (!selection || selection.isCollapsed) return { rects, elements, hosts }
   const band = { ...EVERYWHERE, top: -innerHeight, bottom: 2 * innerHeight }
-  const clips = new Map<Element, Box>()
+  const clipped = new Map<Element, Box>()
   const lineHeights = new Map<Element, number>()
   const backdrops = new Map<Element, Backdrop>()
   const origins = new Map<HTMLElement, Origin>()
@@ -62,7 +55,7 @@ export function readSelection(root: Node, padding: Padding, originOf: (host: HTM
       hosts.set(backdrop.element, backdrop.theme)
       let origin = origins.get(backdrop.element)
       if (!origin) origins.set(backdrop.element, (origin = originOf(backdrop.element)))
-      const clip = intersect(band, clipOf(parent, clips))
+      const clip = intersect(band, clipOf(parent, clipped))
       let lineHeight = lineHeights.get(parent)
       if (lineHeight === undefined) lineHeights.set(parent, (lineHeight = lineHeightOf(parent)))
       probe.selectNodeContents(node)
@@ -178,7 +171,7 @@ function firstLetterEnd(node: Text): number {
   return /^\s*\p{P}*\S\p{P}*/u.exec(node.data)?.[0].length ?? -1
 }
 
-const hidden = (element: HTMLElement): boolean => getComputedStyle(element).visibility !== 'visible' || element.closest('[inert]') !== null
+const hidden = (element: HTMLElement): boolean => !element.checkVisibility({ visibilityProperty: true }) || element.closest('[inert]') !== null
 
 function selectable(element: HTMLElement | null, cache: Map<Element, boolean>): boolean {
   if (!element) return true
@@ -242,20 +235,20 @@ function clipOf(element: Element | null, cache: Map<Element, Box>): Box {
   if (!element || element === document.body || element === document.documentElement) return EVERYWHERE
   let clip = cache.get(element)
   if (clip) return clip
-  clip = clipOf(element.parentElement, cache)
-  const { overflowX, overflowY } = getComputedStyle(element)
-  if (overflowX !== 'visible' || overflowY !== 'visible') {
-    const r = element.getBoundingClientRect()
-    const left = r.left + element.clientLeft
-    const top = r.top + element.clientTop
-    clip = intersect(clip, { left, top, right: left + element.clientWidth, bottom: top + element.clientHeight })
+  const parent = element.parentElement
+  clip = clipOf(parent, cache)
+  if (clips(getComputedStyle(element))) clip = intersect(clip, paddingBox(element))
+  if (parent instanceof HTMLDetailsElement && element !== parent.querySelector(':scope > summary') && clips(getComputedStyle(parent, '::details-content'))) {
+    clip = intersect(clip, detailsContentBox(parent))
   }
   cache.set(element, clip)
   return clip
 }
 
-function intersect(a: Box, b: Box): Box {
-  return { left: Math.max(a.left, b.left), top: Math.max(a.top, b.top), right: Math.min(a.right, b.right), bottom: Math.min(a.bottom, b.bottom) }
+function detailsContentBox(details: HTMLDetailsElement): Box {
+  const box = paddingBox(details)
+  const summary = details.querySelector(':scope > summary')
+  return summary ? { ...box, top: Math.max(box.top, summary.getBoundingClientRect().bottom) } : box
 }
 
 function* selectedText(range: Range, root: Node): Generator<Text> {

@@ -30,6 +30,34 @@ export const toLocal = ({ x, y, width, height }: Region, origin: Origin): Region
   height: height / origin.scale,
 })
 
+export interface Box {
+  left: number
+  top: number
+  right: number
+  bottom: number
+}
+
+export const clips = ({ overflowX, overflowY }: CSSStyleDeclaration): boolean => overflowX !== 'visible' || overflowY !== 'visible'
+
+export function paddingBox(element: Element): Box {
+  const r = element.getBoundingClientRect()
+  const left = r.left + element.clientLeft
+  const top = r.top + element.clientTop
+  return { left, top, right: left + element.clientWidth, bottom: top + element.clientHeight }
+}
+
+export function intersect(a: Box, b: Box): Box {
+  return { left: Math.max(a.left, b.left), top: Math.max(a.top, b.top), right: Math.min(a.right, b.right), bottom: Math.min(a.bottom, b.bottom) }
+}
+
+export function visiblePart(host: HTMLElement, { x, y, width, height }: Region): Region {
+  let box: Box = { left: x, top: y, right: x + width, bottom: y + height }
+  for (let element: Element | null = host; element && element !== document.body && element !== document.documentElement; element = element.parentElement) {
+    if (clips(getComputedStyle(element))) box = intersect(box, paddingBox(element))
+  }
+  return { x: box.left, y: box.top, width: box.right - box.left, height: box.bottom - box.top }
+}
+
 export function drawnRegion(frame: Frame, [side, top, bottom]: readonly [number, number, number], within: Region): Region | null {
   const { lines, sprites } = frame
   let left = Infinity

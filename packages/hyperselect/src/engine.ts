@@ -2,7 +2,7 @@ import { Governor } from './governor'
 import { Layer } from './layer'
 import { LINE_FLOATS, Lines, MAX_LINES } from './lines'
 import { Pool, SPRITE_FLOATS } from './pool'
-import { arrange, drawnRegion, type Origin, type Region, toLocal } from './region'
+import { arrange, drawnRegion, type Origin, type Region, toLocal, visiblePart } from './region'
 import { type Frame, Renderer } from './renderer'
 import { type Look, type Padding, readSelection, type Selected, toPadding } from './selection'
 import { Stage } from './stage'
@@ -361,7 +361,7 @@ export class Engine implements HyperSelect {
     const view = this.view()
     const placed = [...hosts].map((host) => {
       const origin = this.originOf(host)
-      return { layer: this.layers.get(host)!, origin, view: toLocal(view, origin) }
+      return { layer: this.layers.get(host)!, origin, view: toLocal(visiblePart(host, view), origin) }
     })
     const area = placed.reduce((sum, { layer, origin, view }) => sum + this.lines.area(this.preset.pad, view, layer.host) * origin.scale ** 2, 0)
     const paced = this.paced(area)

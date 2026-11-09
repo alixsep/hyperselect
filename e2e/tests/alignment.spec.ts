@@ -210,6 +210,23 @@ test('draws over painted items in a positioned scrolling box and follows its scr
   await expectAligned(page)
 })
 
+test('never grows the scrolling box it draws in', async ({ page }) => {
+  await page.evaluate(() => document.querySelector('#feed')!.scrollIntoView({ block: 'center' }))
+  const size = () => page.$eval('#feed', (feed) => [feed.scrollWidth, feed.scrollHeight])
+  const before = await size()
+  await select(page, '#feed')
+  await page.waitForTimeout(SETTLE_MS)
+  expect(await size()).toEqual(before)
+})
+
+test('skips text folded away in a closed details', async ({ page }) => {
+  await page.evaluate(() => document.querySelector('#folded')!.scrollIntoView({ block: 'center' }))
+  await select(page, '#folded')
+  await page.waitForTimeout(SETTLE_MS)
+  expect(await page.getAttribute('#folded summary', 'data-hyperselect-selected')).not.toBeNull()
+  expect(await page.getAttribute('#folded p', 'data-hyperselect-selected')).toBeNull()
+})
+
 test('leaves rotated and vertical text to the native highlight', async ({ page }) => {
   for (const selector of ['#tilted', '#vertical']) {
     await select(page, selector)
